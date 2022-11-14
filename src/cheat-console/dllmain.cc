@@ -1,14 +1,16 @@
-﻿#include <iostream>
-#include <windows.h>
+﻿#include <windows.h>
 #include <detours.h>
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <string>
-#include <atomic>
-#include <thread>
-#include <algorithm>
 
-using namespace std;
+#include <algorithm>
+#include <atomic>
+#include <iostream>
+#include <string>
+#include <thread>
+
+// -----------------------------------------------------------------------------
 
 // IF __cdecl THEN invert parameter list
 
@@ -95,27 +97,27 @@ DWORD* thisDVConsole = nullptr;
 DWORD* __fastcall DVConsole_Hook(PVOID pThis)
 {
     thisDVConsole = (DWORD*)pThis;
-    cout << "DVConsole is at: " << thisDVConsole << endl;
+    std::cout << "DVConsole is at: " << thisDVConsole << std::endl;
     return DVConsole(pThis);
 }
 
 void _cdecl SBDrawManagerPrintConsole_Hook(PVOID pThis, char* text)
 {
     if (&text)
-        cout << text << endl;
+        std::cout << text << std::endl;
 }
 
 void _cdecl	SBDrawManagerPrintConsoleWithInt_Hook(PVOID pThis, DWORD* value, char* text)
 {
     /*if (&text)
-        cout << text << endl;*/
+        std::cout << text << std::endl;*/
 }
 
 DWORD* __fastcall DVScript_Hook(PVOID pThis)
 {
     if (thisDVScript == nullptr) {
         thisDVScript = (DWORD*)pThis;
-        cout << "DVScript is at: " << thisDVScript << endl;
+        std::cout << "DVScript is at: " << thisDVScript << std::endl;
     }
     return DVScript(pThis);
 }
@@ -136,9 +138,9 @@ int __stdcall DVElementActorHumanCheckIfViolationOfInternationalWar_Hook(DWORD* 
     __asm mov pDamageBase, edi
     if (pDamageBase) {
         short* Health = reinterpret_cast<short*>(pDamageBase) + 0x16 / 2;
-        //cout << *Health << endl;
+        //std::cout << *Health << std::endl;
     }
-    //cout << "DVElementActorHumanCheckIfViolationOfInternationalWar: " << a1 << " - " << a2 << " = " << x << endl;
+    //std::cout << "DVElementActorHumanCheckIfViolationOfInternationalWar: " << a1 << " - " << a2 << " = " << x << std::endl;
     return x;
 }
 
@@ -147,13 +149,13 @@ std::thread cinThread;
 
 void ReadCin()
 {
-    string consoleInput;
+    std::string consoleInput;
     DWORD dwOldValue, dwTemp;
     bool minimiEnabled = false;
 
     while (consoleInput != "qqq") {
         //cin >> consoleInput;
-        //cout << "> ";
+        //std::cout << "> ";
         getline(std::cin >> std::ws, consoleInput);
         std::for_each(consoleInput.begin(), consoleInput.end(), [](char& c) {
             c = ::tolower(c);
@@ -166,10 +168,10 @@ void ReadCin()
                 if (*hero) {
                     BYTE* enabled = reinterpret_cast<BYTE*>(*hero) + 0xB5 / sizeof(BYTE);
                     if (*enabled) {
-                        cout << "Disabling control for Cooper." << endl;
+                        std::cout << "Disabling control for Cooper." << std::endl;
                         *enabled = 0;
                     } else {
-                        cout << "Enabling control for Cooper." << endl;
+                        std::cout << "Enabling control for Cooper." << std::endl;
                         *enabled = 1;
                     }
                 }
@@ -180,10 +182,10 @@ void ReadCin()
                 if (*hero) {
                     BYTE* enabled = reinterpret_cast<BYTE*>(*hero) + 0xB5 / sizeof(BYTE);
                     if (*enabled) {
-                        cout << "Disabling control for Doc." << endl;
+                        std::cout << "Disabling control for Doc." << std::endl;
                         *enabled = 0;
                     } else {
-                        cout << "Enabling control for Doc." << endl;
+                        std::cout << "Enabling control for Doc." << std::endl;
                         *enabled = 1;
                     }
                 }
@@ -194,10 +196,10 @@ void ReadCin()
                 if (*hero) {
                     BYTE* enabled = reinterpret_cast<BYTE*>(*hero) + 0xB5 / sizeof(BYTE);
                     if (*enabled) {
-                        cout << "Disabling control for Sanchez." << endl;
+                        std::cout << "Disabling control for Sanchez." << std::endl;
                         *enabled = 0;
                     } else {
-                        cout << "Enabling control for Sanchez." << endl;
+                        std::cout << "Enabling control for Sanchez." << std::endl;
                         *enabled = 1;
                     }
                 }
@@ -208,10 +210,10 @@ void ReadCin()
                 if (*hero) {
                     BYTE* enabled = reinterpret_cast<BYTE*>(*hero) + 0xB5 / sizeof(BYTE);
                     if (*enabled) {
-                        cout << "Disabling control for Sam." << endl;
+                        std::cout << "Disabling control for Sam." << std::endl;
                         *enabled = 0;
                     } else {
-                        cout << "Enabling control for Sam." << endl;
+                        std::cout << "Enabling control for Sam." << std::endl;
                         *enabled = 1;
                     }
                 }
@@ -222,10 +224,10 @@ void ReadCin()
                 if (*hero) {
                     BYTE* enabled = reinterpret_cast<BYTE*>(*hero) + 0xB5 / sizeof(BYTE);
                     if (*enabled) {
-                        cout << "Disabling control for Kate." << endl;
+                        std::cout << "Disabling control for Kate." << std::endl;
                         *enabled = 0;
                     } else {
-                        cout << "Enabling control for Kate." << endl;
+                        std::cout << "Enabling control for Kate." << std::endl;
                         *enabled = 1;
                     }
                 }
@@ -236,16 +238,16 @@ void ReadCin()
                 if (*hero) {
                     BYTE* enabled = reinterpret_cast<BYTE*>(*hero) + 0xB5 / sizeof(BYTE);
                     if (*enabled) {
-                        cout << "Disabling control for Mia." << endl;
+                        std::cout << "Disabling control for Mia." << std::endl;
                         *enabled = 0;
                     } else {
-                        cout << "Enabling control for Mia." << endl;
+                        std::cout << "Enabling control for Mia." << std::endl;
                         *enabled = 1;
                     }
                 }
             }
         } else if (consoleInput == "partisan") {
-            cout << "Giving everybody a lot of ammo." << endl;
+            std::cout << "Giving everybody a lot of ammo." << std::endl;
             if (thisDVConsole != nullptr) {
                 WORD* amount;
                 DWORD* cooper = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCCC / sizeof(DWORD);
@@ -283,18 +285,18 @@ void ReadCin()
             PVOID subAddress = (PVOID)(gameAddress + 0x00095D09);
             VirtualProtect((LPVOID)subAddress, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &dwOldValue);
             if (!minimiEnabled) {
-                cout << "Gattling guns don't lose ammo." << endl;
+                std::cout << "Gattling guns don't lose ammo." << std::endl;
                 BYTE newCode[] = { 0x90, 0x90 };
                 memcpy(subAddress, newCode, sizeof(newCode));
             } else {
-                cout << "Gattling guns do lose ammo." << endl;
+                std::cout << "Gattling guns do lose ammo." << std::endl;
                 BYTE newCode[] = { 0x2B, 0xD0 };
                 memcpy(subAddress, newCode, sizeof(newCode));
             }
             VirtualProtect((LPVOID)subAddress, sizeof(DWORD), dwOldValue, &dwTemp);
             minimiEnabled = !minimiEnabled;
         } else if (consoleInput == "give all") {
-            cout << "Giving a bunch of stuff to everybody." << endl;
+            std::cout << "Giving a bunch of stuff to everybody." << std::endl;
             if (thisDVConsole != nullptr) {
                 WORD* amount;
                 DWORD* doc = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCD0 / sizeof(DWORD);
@@ -332,7 +334,7 @@ void ReadCin()
                 }
             }
         } else if (consoleInput == "watch") {
-            cout << "Giving Cooper his watch." << endl;
+            std::cout << "Giving Cooper his watch." << std::endl;
             if (thisDVConsole != nullptr) {
                 DWORD* cooper = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCCC / sizeof(DWORD);
                 if (*cooper) {
@@ -341,7 +343,7 @@ void ReadCin()
                 }
             }
         } else if (consoleInput == "knife") {
-            cout << "Giving Cooper his knife." << endl;
+            std::cout << "Giving Cooper his knife." << std::endl;
             if (thisDVConsole != nullptr) {
                 DWORD* cooper = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCCC / sizeof(DWORD);
                 if (*cooper) {
@@ -350,7 +352,7 @@ void ReadCin()
                 }
             }
         } else if (consoleInput == "snake") {
-            cout << "Giving Sam a snake." << endl;
+            std::cout << "Giving Sam a snake." << std::endl;
             if (thisDVConsole != nullptr) {
                 DWORD* sam = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCD8 / sizeof(DWORD);
                 if (*sam) {
@@ -359,7 +361,7 @@ void ReadCin()
                 }
             }
         } else if (consoleInput == "tnt") {
-            cout << "Giving Sam some TNT." << endl;
+            std::cout << "Giving Sam some TNT." << std::endl;
             if (thisDVConsole != nullptr) {
                 DWORD* sam = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCD8 / sizeof(DWORD);
                 if (*sam) {
@@ -371,26 +373,26 @@ void ReadCin()
         
         
         /*if (consoleInput == "disable cooper") {
-            cout << "Disabling control for Cooper." << endl;
+            std::cout << "Disabling control for Cooper." << std::endl;
             if (thisDVScript != nullptr) {
                 DWORD* cooper = DVScriptGetCooper(thisDVScript);
                 DVScriptDeactivatePC(cooper, thisDVScript);
             }
         } else if (consoleInput == "enable cooper") {
-            cout << "Enabling control for Cooper." << endl;
+            std::cout << "Enabling control for Cooper." << std::endl;
             if (thisDVScript != nullptr) {
                 DWORD* cooper = DVScriptGetCooper(thisDVScript);
                 DVScriptActivatePC(cooper, thisDVScript);
             }
         } else if (consoleInput == "spawn_doc") {
-            cout << "Spawning Doc." << endl;
+            std::cout << "Spawning Doc." << std::endl;
             if (thisDVConsole != nullptr) {
                PVOID doc = malloc(0x2C8u);
                PVOID docChar = DVDoc(doc); // TODO: Get this from DVEngine
 
             }
         } else if (consoleInput == "ammo") {
-            cout << "Giving Doc ammo." << endl;
+            std::cout << "Giving Doc ammo." << std::endl;
             if (thisDVConsole != nullptr) {
                 DWORD* doc = reinterpret_cast<DWORD*>(*thisDVConsole) + 3280 / sizeof(DWORD);
                 WORD* docSniperAmmo = reinterpret_cast<WORD*>(*doc) + 704 / sizeof(WORD);
@@ -400,7 +402,7 @@ void ReadCin()
             if (thisDVConsole != nullptr) {
                 DWORD* input = reinterpret_cast<DWORD*>(thisDVConsole) + 0x4 / sizeof(DWORD);
                 memcpy(input, consoleInput.c_str(), sizeof(consoleInput));
-                //cout << "Entering cheat: " << (char*)input << endl;
+                //std::cout << "Entering cheat: " << (char*)input << std::endl;
                 DVConsoleExecuteCommand(thisDVConsole);
             }
         }
@@ -435,7 +437,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
         //std::cout << "Module Address: " << ": " << (DWORD)GetModuleHandleA(NULL) << std::endl;
         InitFunctionAddresses((DWORD)GetModuleHandleA(NULL));
 
-        cinThread = thread(ReadCin);
+        cinThread = std::thread(ReadCin);
         break;
     case DLL_THREAD_ATTACH:
         //std::cout << "Module Address ATTACH: " << ": " << (DWORD)GetModuleHandleA(NULL) << std::endl;

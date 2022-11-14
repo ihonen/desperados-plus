@@ -1,5 +1,5 @@
 add_library(cheat-console SHARED
-    DeathValley.cpp
+    dllmain.cc
     # It was easier to just compile Detours as part of the target...
     ${EXTERN}/Detours/src/creatwth.cpp
     ${EXTERN}/Detours/src/detours.cpp

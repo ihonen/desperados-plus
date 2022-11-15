@@ -12,17 +12,24 @@
 
 // -----------------------------------------------------------------------------
 
-#define DEBUG(f, ...) \
+#ifdef DP_DEV_BUILD
+# define DEBUG(f, ...) \
     fprintf(stderr, "DEBUG: " f "\n", ##__VA_ARGS__)
 
-#define INFO(f, ...) \
+# define INFO(f, ...) \
     fprintf(stderr, "INFO:  " f "\n", ##__VA_ARGS__)
 
-#define WARN(f, ...) \
+# define WARN(f, ...) \
     fprintf(stderr, "WARN:  " f "\n", ##__VA_ARGS__)
 
-#define ERROR(f, ...) \
+# define ERROR(f, ...) \
     fprintf(stderr, "ERROR: " f "\n", ##__VA_ARGS__)
+#else
+# define DEBUG(...)
+# define INFO(...)
+# define WARN(...)
+# define ERROR(...)
+#endif
 
 // -----------------------------------------------------------------------------
 
@@ -140,6 +147,38 @@ int __stdcall DVElementActorHumanCheckIfViolationOfInternationalWar_Hook(DWORD* 
 
 void stdinLoop()
 {
+    printf(
+        "****************************************************************************************************\n"
+        "* DESPERADOS+ CHEAT CONSOLE\n"
+        "****************************************************************************************************\n"
+        "MISC\n"
+        "    qqq                       Quit the game\n"
+        "CHEATS\n"
+        "    clint                     Win mission\n"
+        "    zeus                      Kill enemies using view cone cursor\n"
+        "    hollow man                Toggle invisibility\n"
+        "    fidel castro              Play all dialogs\n"
+        "    timeless                  Alternative pause mode (Default key: P)\n"
+        "    powerman                  Unknown (I've got a big gun...)\n"
+        "    partisan                  Everybody gets a lot of ammo\n"
+        "    minimi                    Toggle gattling guns losing ammo\n"
+        "    give all                  Everybody gets a bunch of everything\n"
+        "    knife                     Cooper gets his knife\n"
+        "    watch                     Cooper gets his watch\n"
+        "    snake                     Sam gets a snake\n"
+        "    tnt                       Sam gets some TNT\n"
+        "    jackal                    Doc gets a lot of sniper bullets\n"
+        "    schneider                 Mia gets a lot of peanuts\n"
+        "    behind the ennemy horse   Set all heroes' health to 50\n"
+        "DEBUG\n"
+        "    show me all               Display map geometry\n"
+        "    whats my destiny          Display all objectives in pause menu\n"
+        "    epitaph                   Display all victory and failure conditions\n"
+        "    supersonic                Display ranges of walk noise of the PCs (will probably crash the game)\n"
+        "    medic                     Unknown debug view (arrow keys change top value)\n"
+        "****************************************************************************************************\n"
+    );
+
     std::string consoleInput;
     DWORD dwOldValue, dwTemp;
     bool minimiEnabled = false;

@@ -3,15 +3,19 @@ PKG_DIR   := $(BUILD_DIR)/package
 
 # ------------------------------------------------------------------------------
 
-configure:
-	cmake -B $(BUILD_DIR) -S . -A Win32
-.PHONY: configure
+configure-debug:
+	cmake -B $(BUILD_DIR) -S . -A Win32 -DDP_DEV_BUILD=ON
+.PHONY: configure-debug
 
-build-debug: configure
+configure-release:
+	cmake -B $(BUILD_DIR) -S . -A Win32
+.PHONY: configure-release
+
+build-debug: configure-debug
 	cmake --build $(BUILD_DIR) --config Debug --parallel
 .PHONY: build-debug
 
-build-release: configure
+build-release: configure-release
 	cmake --build $(BUILD_DIR) --config Release --parallel
 .PHONY: build-release
 

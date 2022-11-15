@@ -16,4 +16,10 @@ set(EXTERN ${CMAKE_SOURCE_DIR}/extern)
 
 # ------------------------------------------------------------------------------
 
+if (DP_DEV_BUILD)
+    add_definitions(-DDP_DEV_BUILD)
+endif ()
+
+# ------------------------------------------------------------------------------
+
 add_subdirectory(src)

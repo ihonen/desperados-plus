@@ -12,6 +12,20 @@
 
 // -----------------------------------------------------------------------------
 
+#define DEBUG(f, ...) \
+    fprintf(stderr, "DEBUG: " f "\n", ##__VA_ARGS__)
+
+#define INFO(f, ...) \
+    fprintf(stderr, "INFO:  " f "\n", ##__VA_ARGS__)
+
+#define WARN(f, ...) \
+    fprintf(stderr, "WARN:  " f "\n", ##__VA_ARGS__)
+
+#define ERROR(f, ...) \
+    fprintf(stderr, "ERROR: " f "\n", ##__VA_ARGS__)
+
+// -----------------------------------------------------------------------------
+
 // IF __cdecl THEN invert parameter list
 
 // OTHER
@@ -69,28 +83,6 @@ tDVScriptGetCooper DVScriptGetCooper;
 tDVScriptActivatePC DVScriptActivatePC;
 tDVScriptDeactivatePC DVScriptDeactivatePC;
 
-// Game Offset: 0x00400000
-void InitFunctionAddresses(DWORD game) {
-    gameAddress = game;
-    DVElementActorHumanTranslate = (tDVElementActorHumanTranslate)(gameAddress + 0x0009CC60);
-    DVElementActorHumanCheckIfViolationOfInternationalWar = (tDVElementActorHumanCheckIfViolationOfInternationalWar)(gameAddress + 0x00093930);
-
-    DVDoc = (tDVDoc)(gameAddress + 0x0007D1B0);
-
-    DVConsole = (tDVConsole)(gameAddress + 0x00075DC0);
-    DVConsoleExecuteCommand = (tDVConsoleExecuteCommand)(gameAddress + 0x00075DE0);
-
-    SBDrawManagerPrintConsole = (tSBDrawManagerPrintConsole)(gameAddress + 0x0007A940);
-    SBDrawManagerPrintConsoleWithInt = (tSBDrawManagerPrintConsoleWithInt)(gameAddress + 0x0010C9A6);
-
-    DVScript = (tDVScript)(gameAddress + 0x0015B410);
-    DVScriptThis = (tDVScriptThis)(gameAddress + 0x0015DAE0);
-    DVScriptGetActor = (tDVScriptGetActor)(gameAddress + 0x0015CFF0);
-    DVScriptGetCooper = (tDVScriptGetCooper)(gameAddress + 0x0015D4A0);
-    DVScriptActivatePC = (tDVScriptActivatePC)(gameAddress + 0x0015B580);
-    DVScriptDeactivatePC = (tDVScriptDeactivatePC)(gameAddress + 0x0015C620);
-}
-
 DWORD* thisDVScript = nullptr;
 DWORD* thisDVConsole = nullptr;
 
@@ -144,10 +136,9 @@ int __stdcall DVElementActorHumanCheckIfViolationOfInternationalWar_Hook(DWORD* 
     return x;
 }
 
-// https://stackoverflow.com/questions/6736536/c-input-and-output-to-the-console-window-at-the-same-time
-std::thread cinThread;
+// -----------------------------------------------------------------------------
 
-void ReadCin()
+void stdinLoop()
 {
     std::string consoleInput;
     DWORD dwOldValue, dwTemp;
@@ -411,89 +402,149 @@ void ReadCin()
     exit(0);
 }
 
-// ##### MAIN #######################################################################################
+// -----------------------------------------------------------------------------
 
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
+// https://stackoverflow.com/questions/6736536/c-input-and-output-to-the-console-window-at-the-same-time
+static std::thread stdinLoopThread;
+
+void initStdinLoop()
 {
-    FILE* streamOut;
-    FILE* streamIn;
-    LONG errorCode = 0;
+    DEBUG("Entering stdin loop");
+    stdinLoopThread = std::thread(stdinLoop);
+}
 
-    PVOID quickAddress;
-    BYTE toCpy[] = { 0xE8 };
-    BYTE toCpy2[] = { 0x90, 0x90 };
-    DWORD dwOldValue, dwTemp;
+static void initConsole()
+{
+    FILE* consoleOut = NULL;
+    FILE* consoleIn  = NULL;
+
+    AllocConsole();
+    freopen_s(&consoleOut, "CONOUT$", "w", stdout);
+    freopen_s(&consoleOut, "CONOUT$", "w", stderr);
+    freopen_s(&consoleIn,  "CONIN$",  "r", stdin);
+    std::cout.clear();
+    std::cerr.clear();
+    std::cin.clear();
+}
+
+static void initFunctionAddresses(DWORD baseAddr)
+{
+    gameAddress = baseAddr;
+
+    // -----
     
-    switch (ul_reason_for_call) {
+    DVElementActorHumanTranslate =
+        (tDVElementActorHumanTranslate)
+        (baseAddr + 0x0009CC60);
+    
+    DVElementActorHumanCheckIfViolationOfInternationalWar =
+        (tDVElementActorHumanCheckIfViolationOfInternationalWar)
+        (baseAddr + 0x00093930);
+
+    DVDoc =
+        (tDVDoc)
+        (baseAddr + 0x0007D1B0);
+
+    DVConsole =
+        (tDVConsole)
+        (baseAddr + 0x00075DC0);
+
+    DVConsoleExecuteCommand =
+        (tDVConsoleExecuteCommand)
+        (baseAddr + 0x00075DE0);
+
+    SBDrawManagerPrintConsole =
+        (tSBDrawManagerPrintConsole)
+        (baseAddr + 0x0007A940);
+    
+    SBDrawManagerPrintConsoleWithInt =
+        (tSBDrawManagerPrintConsoleWithInt)
+        (baseAddr + 0x0010C9A6);
+
+    DVScript =
+        (tDVScript)
+        (baseAddr + 0x0015B410);
+    
+    DVScriptThis =
+        (tDVScriptThis)
+        (baseAddr + 0x0015DAE0);
+    
+    DVScriptGetActor =
+        (tDVScriptGetActor)
+        (baseAddr + 0x0015CFF0);
+
+    DVScriptGetCooper =
+        (tDVScriptGetCooper)
+        (baseAddr + 0x0015D4A0);
+
+    DVScriptActivatePC =
+        (tDVScriptActivatePC)
+        (baseAddr + 0x0015B580);
+
+    DVScriptDeactivatePC =
+        (tDVScriptDeactivatePC)
+        (baseAddr + 0x0015C620);
+}
+
+// -----------------------------------------------------------------------------
+
+static void initHooks()
+{
+    // I don't fully understand why, but this function is allowed to return FALSE.
+    DetourRestoreAfterWith();
+
+    if (DetourTransactionBegin() != 0)
+    {
+        ERROR("DetourTransactionBegin(): %i", (int)GetLastError());
+        return;
+    }
+
+    if (DetourUpdateThread(GetCurrentThread()) != 0)
+    {
+        ERROR("DetourUpdateThread(): %i", (int)GetLastError());
+        return;
+    }
+
+    if (DetourAttach(&(PVOID&)DVConsole, DVConsole_Hook) != 0
+        || DetourAttach(&(PVOID&)DVScript, DVScript_Hook) != 0)
+    {
+        ERROR("DetourAttach(): %i", (int)GetLastError());
+        return;
+    }
+
+    if (DetourTransactionCommit() != 0)
+    {
+        ERROR("DetourTransactionCommit(): %i", (int)GetLastError());
+        return;
+    }
+}
+
+// -----------------------------------------------------------------------------
+
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID /*lpvReserved*/)
+{
+    switch (fdwReason)
+    {
     case DLL_PROCESS_ATTACH:
-        AllocConsole();
-        freopen_s(&streamOut, "CONOUT$", "w", stdout);
-        freopen_s(&streamOut, "CONOUT$", "w", stderr);
-        freopen_s(&streamIn, "CONIN$", "r", stdin);
-        std::cout.clear();
-        std::cerr.clear();
-        std::cin.clear();
-
-        //std::cout << "Module Address: " << ": " << (DWORD)GetModuleHandleA(NULL) << std::endl;
-        InitFunctionAddresses((DWORD)GetModuleHandleA(NULL));
-
-        cinThread = std::thread(ReadCin);
+        DEBUG("DLL_PROCESS_ATTACH");
+        initConsole();
+        initFunctionAddresses((DWORD)GetModuleHandleA(NULL));
+        initStdinLoop();
         break;
+
     case DLL_THREAD_ATTACH:
-        //std::cout << "Module Address ATTACH: " << ": " << (DWORD)GetModuleHandleA(NULL) << std::endl;
-        
-        DetourRestoreAfterWith();
-        DetourTransactionBegin();
-        DetourUpdateThread(GetCurrentThread());
-
-        // Attaching
-        errorCode = DetourAttach(&(PVOID&)DVConsole, DVConsole_Hook);
-        errorCode = DetourAttach(&(PVOID&)DVScript, DVScript_Hook);
-        //errorCode = DetourAttach(&(PVOID&)DVElementActorHumanTranslate, DVElementActorHumanTranslate_Hook);
-        //errorCode = DetourAttach(&(PVOID&)DVElementActorHumanCheckIfViolationOfInternationalWar, DVElementActorHumanCheckIfViolationOfInternationalWar_Hook);
-
-        /*
-        errorCode = DetourAttach(&(PVOID&)SBDrawManagerPrintConsole, SBDrawManagerPrintConsole_Hook);
-        // Print with INT 1
-        quickAddress = (PVOID)(gameAddress + 0x0010C9A6);
-        errorCode = DetourAttach(&(PVOID&)quickAddress, SBDrawManagerPrintConsoleWithInt_Hook);
-        VirtualProtect((LPVOID)quickAddress, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &dwOldValue);
-        memcpy(quickAddress, toCpy, sizeof(toCpy));
-        VirtualProtect((LPVOID)quickAddress, sizeof(DWORD), dwOldValue, &dwTemp);
-        // Print with INT 2
-        quickAddress = (PVOID)(gameAddress + 0x0018FD7E);
-        errorCode = DetourAttach(&(PVOID&)quickAddress, SBDrawManagerPrintConsoleWithInt_Hook);
-        VirtualProtect((LPVOID)quickAddress, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &dwOldValue);
-        memcpy(quickAddress, toCpy, sizeof(toCpy));
-        VirtualProtect((LPVOID)quickAddress, sizeof(DWORD), dwOldValue, &dwTemp);
-        // Print with INT 3
-        quickAddress = (PVOID)(gameAddress + 0x00190385);
-        errorCode = DetourAttach(&(PVOID&)quickAddress, SBDrawManagerPrintConsoleWithInt_Hook);
-        VirtualProtect((LPVOID)quickAddress, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &dwOldValue);
-        memcpy(quickAddress, toCpy, sizeof(toCpy));
-        VirtualProtect((LPVOID)quickAddress, sizeof(DWORD), dwOldValue, &dwTemp);
-        // Print with INT 4 - to nop
-        quickAddress = (PVOID)(gameAddress + 0x0004408A);
-        VirtualProtect((LPVOID)quickAddress, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &dwOldValue);
-        memcpy(quickAddress, toCpy2, sizeof(toCpy2));
-        VirtualProtect((LPVOID)quickAddress, sizeof(DWORD), dwOldValue, &dwTemp);
-        quickAddress = (PVOID)(gameAddress + 0x00132D25);
-        VirtualProtect((LPVOID)quickAddress, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &dwOldValue);
-        memcpy(quickAddress, toCpy2, sizeof(toCpy2));
-        VirtualProtect((LPVOID)quickAddress, sizeof(DWORD), dwOldValue, &dwTemp);
-        */
-
-        if (errorCode) {
-            std::cerr << "ATTACH ERROR: " << errorCode << " - " << GetLastError() << std::endl;
-        }
-        errorCode = DetourTransactionCommit();
-        if (errorCode) {
-            std::cerr << "ERROR TRANSACTION: " << errorCode << " - " << GetLastError() << std::endl;
-        }
+        DEBUG("DLL_THREAD_ATTACH");
+        initHooks();
+        break;
 
     case DLL_THREAD_DETACH:
+        DEBUG("DLL_THREAD_DETACH");
+        break;
+
     case DLL_PROCESS_DETACH:
+        DEBUG("DLL_PROCESS_DETACH");
         break;
     }
+
     return TRUE;
 }

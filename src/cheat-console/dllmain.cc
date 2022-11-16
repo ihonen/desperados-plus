@@ -46,7 +46,7 @@ typedef DWORD (__thiscall* tDVConsole_ExecuteCommand)(PVOID);
 typedef char (__cdecl* tSBDrawManager_PrintConsole)(PCHAR, PVOID);
 
 // _DWORD SBDrawManager::PrintConsole(SBDrawManager* __hidden this, unsigned, char*, ...)
-typedef char(__cdecl* tSBDrawManager_PrintConsoleWithInt)(PCHAR, DWORD, PVOID);
+typedef char (__cdecl* tSBDrawManager_PrintConsoleWithInt)(PCHAR, DWORD, PVOID);
 
 // -----------------------------------------------------------------------------
 // SCRIPTS
@@ -81,10 +81,10 @@ typedef DWORD* (__thiscall* tDVDoc_Ctor)(PVOID);
 // OTHER
 // -----------------------------------------------------------------------------
 
-// void __thiscall DVElementActorHuman::Translate (DVElementActorHuman* this, DVSequenceElement* param_1, DVcommand param_2)
+// void __thiscall DVElementActorHuman::Translate(DVElementActorHuman* this, DVSequenceElement* param_1, DVcommand param_2)
 typedef void (__thiscall* tDVElementActorHuman_Translate)(PVOID, DWORD*, DWORD);
 
-// void __thiscall DVElementActorHuman::CheckIfViolationOfInternationalWar (DVElementActorHuman* this, DVElement* param_1, DVElement* param_2)
+// void __thiscall DVElementActorHuman::CheckIfViolationOfInternationalWar(DVElementActorHuman* this, DVElement* param_1, DVElement* param_2)
 typedef int (__stdcall* tDVElementActorHuman_CheckIfViolationOfInternationalWar)(DWORD*, DWORD*);
 
 // -----------------------------------------------------------------------------
@@ -92,43 +92,43 @@ typedef int (__stdcall* tDVElementActorHuman_CheckIfViolationOfInternationalWar)
 static tDVElementActorHuman_CheckIfViolationOfInternationalWar DVElementActorHuman_CheckIfViolationOfInternationalWar;
 static tDVElementActorHuman_Translate                          DVElementActorHuman_Translate;
 
-static tDVDoc_Ctor DVDoc_Ctor;
+static tDVDoc_Ctor                                             DVDoc_Ctor;
 
-static tDVConsole_Ctor           DVConsole_Ctor;
-static tDVConsole_ExecuteCommand DVConsole_ExecuteCommand;
+static tDVConsole_Ctor                                         DVConsole_Ctor;
+static tDVConsole_ExecuteCommand                               DVConsole_ExecuteCommand;
 
-static tSBDrawManager_PrintConsole        SBDrawManager_PrintConsole;
-static tSBDrawManager_PrintConsoleWithInt SBDrawManager_PrintConsoleWithInt;
+static tSBDrawManager_PrintConsole                             SBDrawManager_PrintConsole;
+static tSBDrawManager_PrintConsoleWithInt                      SBDrawManager_PrintConsoleWithInt;
 
-static tDVScript_Ctor         DVScript_Ctor;
-static tDVScript_This         DVScript_This;
-static tDVScript_GetActor     DVScript_GetActor;
-static tDVScript_GetCooper    DVScript_GetCooper;
-static tDVScript_ActivatePC   DVScript_ActivatePC;
-static tDVScript_DeactivatePC DVScript_DeactivatePC;
+static tDVScript_Ctor                                          DVScript_Ctor;
+static tDVScript_This                                          DVScript_This;
+static tDVScript_GetActor                                      DVScript_GetActor;
+static tDVScript_GetCooper                                     DVScript_GetCooper;
+static tDVScript_ActivatePC                                    DVScript_ActivatePC;
+static tDVScript_DeactivatePC                                  DVScript_DeactivatePC;
 
 // -----------------------------------------------------------------------------
 
-static DWORD  gameAddress   = 0x0;
-static DWORD* thisDVScript  = nullptr;
-static DWORD* thisDVConsole = nullptr;
+static DWORD  s_gameBaseAddr   = 0x0;
+static DWORD* s_thisDVScript  = nullptr;
+static DWORD* s_thisDVConsole = nullptr;
 
 // -----------------------------------------------------------------------------
 
 DWORD* __fastcall DVConsole_Ctor_Hook(PVOID pThis)
 {
-    thisDVConsole = (DWORD*)pThis;
-    PRINT_DEBUG("thisDVConsole: %p", thisDVConsole);
+    s_thisDVConsole = (DWORD*)pThis;
+    PRINT_DEBUG("thisDVConsole: %p", s_thisDVConsole);
 
     return DVConsole_Ctor(pThis);
 }
 
 DWORD* __fastcall DVScript_Ctor_Hook(PVOID pThis)
 {
-    if (thisDVScript == nullptr)
+    if (s_thisDVScript == nullptr)
     {
-        thisDVScript = (DWORD*)pThis;
-        PRINT_DEBUG("thisDVScript: %p", thisDVScript);
+        s_thisDVScript = (DWORD*)pThis;
+        PRINT_DEBUG("thisDVScript: %p", s_thisDVScript);
     }
 
     return DVScript_Ctor(pThis);
@@ -185,8 +185,8 @@ void stdinLoop()
         );
         
         if (consoleInput == "toggle cooper") {
-            if (thisDVConsole != nullptr) {
-                DWORD* hero = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCCC / sizeof(DWORD);
+            if (s_thisDVConsole != nullptr) {
+                DWORD* hero = reinterpret_cast<DWORD*>(*s_thisDVConsole) + 0xCCC / sizeof(DWORD);
                 if (*hero) {
                     BYTE* enabled = reinterpret_cast<BYTE*>(*hero) + 0xB5 / sizeof(BYTE);
                     if (*enabled) {
@@ -199,8 +199,8 @@ void stdinLoop()
                 }
             } 
         } else if (consoleInput == "toggle doc") {
-            if (thisDVConsole != nullptr) {
-                DWORD* hero = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCD0 / sizeof(DWORD);
+            if (s_thisDVConsole != nullptr) {
+                DWORD* hero = reinterpret_cast<DWORD*>(*s_thisDVConsole) + 0xCD0 / sizeof(DWORD);
                 if (*hero) {
                     BYTE* enabled = reinterpret_cast<BYTE*>(*hero) + 0xB5 / sizeof(BYTE);
                     if (*enabled) {
@@ -213,8 +213,8 @@ void stdinLoop()
                 }
             }
         } else if (consoleInput == "toggle sanchez") {
-            if (thisDVConsole != nullptr) {
-                DWORD* hero = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCD4 / sizeof(DWORD);
+            if (s_thisDVConsole != nullptr) {
+                DWORD* hero = reinterpret_cast<DWORD*>(*s_thisDVConsole) + 0xCD4 / sizeof(DWORD);
                 if (*hero) {
                     BYTE* enabled = reinterpret_cast<BYTE*>(*hero) + 0xB5 / sizeof(BYTE);
                     if (*enabled) {
@@ -227,8 +227,8 @@ void stdinLoop()
                 }
             }
         } else if (consoleInput == "toggle sam") {
-            if (thisDVConsole != nullptr) {
-                DWORD* hero = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCD8 / sizeof(DWORD);
+            if (s_thisDVConsole != nullptr) {
+                DWORD* hero = reinterpret_cast<DWORD*>(*s_thisDVConsole) + 0xCD8 / sizeof(DWORD);
                 if (*hero) {
                     BYTE* enabled = reinterpret_cast<BYTE*>(*hero) + 0xB5 / sizeof(BYTE);
                     if (*enabled) {
@@ -241,8 +241,8 @@ void stdinLoop()
                 }
             }
         } else if (consoleInput == "toggle kate") {
-            if (thisDVConsole != nullptr) {
-                DWORD* hero = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCDC / sizeof(DWORD);
+            if (s_thisDVConsole != nullptr) {
+                DWORD* hero = reinterpret_cast<DWORD*>(*s_thisDVConsole) + 0xCDC / sizeof(DWORD);
                 if (*hero) {
                     BYTE* enabled = reinterpret_cast<BYTE*>(*hero) + 0xB5 / sizeof(BYTE);
                     if (*enabled) {
@@ -255,8 +255,8 @@ void stdinLoop()
                 }
             }
         } else if (consoleInput == "toggle mia") {
-            if (thisDVConsole != nullptr) {
-                DWORD* hero = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCE0 / sizeof(DWORD);
+            if (s_thisDVConsole != nullptr) {
+                DWORD* hero = reinterpret_cast<DWORD*>(*s_thisDVConsole) + 0xCE0 / sizeof(DWORD);
                 if (*hero) {
                     BYTE* enabled = reinterpret_cast<BYTE*>(*hero) + 0xB5 / sizeof(BYTE);
                     if (*enabled) {
@@ -270,41 +270,41 @@ void stdinLoop()
             }
         } else if (consoleInput == "partisan") {
             std::cout << "Giving everybody a lot of ammo.\n";
-            if (thisDVConsole != nullptr) {
+            if (s_thisDVConsole != nullptr) {
                 WORD* amount;
-                DWORD* cooper = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCCC / sizeof(DWORD);
+                DWORD* cooper = reinterpret_cast<DWORD*>(*s_thisDVConsole) + 0xCCC / sizeof(DWORD);
                 if (*cooper) {
                     amount = reinterpret_cast<WORD*>(*cooper) + 0x146 / sizeof(WORD);
                     *amount = 32767;
                 }
-                DWORD* doc = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCD0 / sizeof(DWORD);
+                DWORD* doc = reinterpret_cast<DWORD*>(*s_thisDVConsole) + 0xCD0 / sizeof(DWORD);
                 if (*doc) {
                     amount = reinterpret_cast<WORD*>(*doc) + 0x146 / sizeof(WORD);
                     *amount = 32767;
                 }
-                DWORD* sanchez = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCD4 / sizeof(DWORD);
+                DWORD* sanchez = reinterpret_cast<DWORD*>(*s_thisDVConsole) + 0xCD4 / sizeof(DWORD);
                 if (*sanchez) {
                     amount = reinterpret_cast<WORD*>(*sanchez) + 0x146 / sizeof(WORD);
                     *amount = 32767;
                 }
-                DWORD* sam = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCD8 / sizeof(DWORD);
+                DWORD* sam = reinterpret_cast<DWORD*>(*s_thisDVConsole) + 0xCD8 / sizeof(DWORD);
                 if (*sam) {
                     amount = reinterpret_cast<WORD*>(*sam) + 0x146 / sizeof(WORD);
                     *amount = 32767;
                 }
-                DWORD* kate = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCDC / sizeof(DWORD);
+                DWORD* kate = reinterpret_cast<DWORD*>(*s_thisDVConsole) + 0xCDC / sizeof(DWORD);
                 if (*kate) {
                     amount = reinterpret_cast<WORD*>(*kate) + 0x146 / sizeof(WORD);
                     *amount = 32767;
                 }
-                DWORD* mia = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCE0 / sizeof(DWORD);
+                DWORD* mia = reinterpret_cast<DWORD*>(*s_thisDVConsole) + 0xCE0 / sizeof(DWORD);
                 if (*mia) {
                     amount = reinterpret_cast<WORD*>(*mia) + 0x146 / sizeof(WORD);
                     *amount = 32767;
                 }
             }
         } else if (consoleInput == "minimi") {
-            PVOID subAddress = (PVOID)(gameAddress + 0x00095D09);
+            PVOID subAddress = (PVOID)(s_gameBaseAddr + 0x00095D09);
             VirtualProtect((LPVOID)subAddress, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &dwOldValue);
             if (!minimiEnabled) {
                 std::cout << "Gatling guns have unlimited ammo.\n";
@@ -319,9 +319,9 @@ void stdinLoop()
             minimiEnabled = !minimiEnabled;
         } else if (consoleInput == "give all") {
             std::cout << "Giving a bunch of stuff to everybody.\n";
-            if (thisDVConsole != nullptr) {
+            if (s_thisDVConsole != nullptr) {
                 WORD* amount;
-                DWORD* doc = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCD0 / sizeof(DWORD);
+                DWORD* doc = reinterpret_cast<DWORD*>(*s_thisDVConsole) + 0xCD0 / sizeof(DWORD);
                 if (*doc) {
                     amount = reinterpret_cast<WORD*>(*doc) + 0x2B2 / sizeof(WORD);
                     *amount = 32767;
@@ -330,24 +330,24 @@ void stdinLoop()
                     amount = reinterpret_cast<WORD*>(*doc) + 0x2C0 / sizeof(WORD);
                     *amount = 32767;
                 }
-                DWORD* sanchez = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCD4 / sizeof(DWORD);
+                DWORD* sanchez = reinterpret_cast<DWORD*>(*s_thisDVConsole) + 0xCD4 / sizeof(DWORD);
                 if (*sanchez) {
                     amount = reinterpret_cast<WORD*>(*sanchez) + 0x2B0 / sizeof(WORD);
                     *amount = 32767;
                     amount = reinterpret_cast<WORD*>(*sanchez) + 0x2B2 / sizeof(WORD);
                     *amount = 32767;
                 }
-                DWORD* sam = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCD8 / sizeof(DWORD);
+                DWORD* sam = reinterpret_cast<DWORD*>(*s_thisDVConsole) + 0xCD8 / sizeof(DWORD);
                 if (*sam) {
                     amount = reinterpret_cast<WORD*>(*sam) + 0x2B4 / sizeof(WORD);
                     *amount = 32767;
                 }
-                DWORD* kate = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCDC / sizeof(DWORD);
+                DWORD* kate = reinterpret_cast<DWORD*>(*s_thisDVConsole) + 0xCDC / sizeof(DWORD);
                 if (*kate) {
                     amount = reinterpret_cast<WORD*>(*kate) + 0x2B0 / sizeof(WORD);
                     *amount = 32767;
                 }
-                DWORD* mia = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCE0 / sizeof(DWORD);
+                DWORD* mia = reinterpret_cast<DWORD*>(*s_thisDVConsole) + 0xCE0 / sizeof(DWORD);
                 if (*mia) {
                     amount = reinterpret_cast<WORD*>(*mia) + 0x2B0 / sizeof(WORD);
                     *amount = 32767;
@@ -357,8 +357,8 @@ void stdinLoop()
             }
         } else if (consoleInput == "watch") {
             std::cout << "Giving Cooper his watch.\n";
-            if (thisDVConsole != nullptr) {
-                DWORD* cooper = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCCC / sizeof(DWORD);
+            if (s_thisDVConsole != nullptr) {
+                DWORD* cooper = reinterpret_cast<DWORD*>(*s_thisDVConsole) + 0xCCC / sizeof(DWORD);
                 if (*cooper) {
                     BYTE* amount = reinterpret_cast<BYTE*>(*cooper) + 0x2C0 / sizeof(BYTE);
                     *amount = 1;
@@ -366,8 +366,8 @@ void stdinLoop()
             }
         } else if (consoleInput == "knife") {
             std::cout << "Giving Cooper his knife.\n";
-            if (thisDVConsole != nullptr) {
-                DWORD* cooper = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCCC / sizeof(DWORD);
+            if (s_thisDVConsole != nullptr) {
+                DWORD* cooper = reinterpret_cast<DWORD*>(*s_thisDVConsole) + 0xCCC / sizeof(DWORD);
                 if (*cooper) {
                     BYTE* amount = reinterpret_cast<BYTE*>(*cooper) + 0x2C1 / sizeof(BYTE);
                     *amount = 1;
@@ -375,8 +375,8 @@ void stdinLoop()
             }
         } else if (consoleInput == "snake") {
             std::cout << "Giving Sam a snake.\n";
-            if (thisDVConsole != nullptr) {
-                DWORD* sam = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCD8 / sizeof(DWORD);
+            if (s_thisDVConsole != nullptr) {
+                DWORD* sam = reinterpret_cast<DWORD*>(*s_thisDVConsole) + 0xCD8 / sizeof(DWORD);
                 if (*sam) {
                     BYTE* amount = reinterpret_cast<BYTE*>(*sam) + 0x2B0 / sizeof(BYTE);
                     *amount = 1;
@@ -384,19 +384,19 @@ void stdinLoop()
             }
         } else if (consoleInput == "tnt") {
             std::cout << "Giving Sam some TNT.\n";
-            if (thisDVConsole != nullptr) {
-                DWORD* sam = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCD8 / sizeof(DWORD);
+            if (s_thisDVConsole != nullptr) {
+                DWORD* sam = reinterpret_cast<DWORD*>(*s_thisDVConsole) + 0xCD8 / sizeof(DWORD);
                 if (*sam) {
                     BYTE* amount = reinterpret_cast<BYTE*>(*sam) + 0x2B1 / sizeof(BYTE);
                     *amount = 1;
                 }
             }
         } else {
-            if (thisDVConsole != nullptr) {
-                DWORD* input = reinterpret_cast<DWORD*>(thisDVConsole) + 0x4 / sizeof(DWORD);
+            if (s_thisDVConsole != nullptr) {
+                DWORD* input = reinterpret_cast<DWORD*>(s_thisDVConsole) + 0x4 / sizeof(DWORD);
                 memcpy(input, consoleInput.c_str(), sizeof(consoleInput));
                 PRINT_DEBUG("Calling DVConsole::ExecuteCommand with '%s'", (char*)input);
-                PRINT_DEBUG("Return value: %i", (int)DVConsole_ExecuteCommand(thisDVConsole));
+                PRINT_DEBUG("Return value: %i", (int)DVConsole_ExecuteCommand(s_thisDVConsole));
             }
         }
     }
@@ -431,7 +431,7 @@ static void initConsole()
 
 static void initFunctionAddresses(DWORD baseAddr)
 {
-    gameAddress = baseAddr;
+    s_gameBaseAddr = baseAddr;
 
     // -----
     

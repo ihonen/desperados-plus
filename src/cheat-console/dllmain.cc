@@ -13,134 +13,125 @@
 // -----------------------------------------------------------------------------
 
 #ifdef DP_DEV_BUILD
-# define DEBUG(f, ...) \
-    fprintf(stderr, "DEBUG: " f "\n", ##__VA_ARGS__)
-
-# define INFO(f, ...) \
-    fprintf(stderr, "INFO:  " f "\n", ##__VA_ARGS__)
-
-# define WARN(f, ...) \
-    fprintf(stderr, "WARN:  " f "\n", ##__VA_ARGS__)
-
-# define ERROR(f, ...) \
-    fprintf(stderr, "ERROR: " f "\n", ##__VA_ARGS__)
+# define PRINT_DEBUG(f, ...) fprintf(stderr, "DEBUG: " f "\n", ##__VA_ARGS__)
+# define PRINT_INFO(f, ...)  fprintf(stderr, "INFO:  " f "\n", ##__VA_ARGS__)
+# define PRINT_WARN(f, ...)  fprintf(stderr, "WARN:  " f "\n", ##__VA_ARGS__)
+# define PRINT_ERROR(f, ...) fprintf(stderr, "ERROR: " f "\n", ##__VA_ARGS__)
 #else
-# define DEBUG(...)
-# define INFO(...)
-# define WARN(...)
-# define ERROR(...)
+# define PRINT_DEBUG(...)
+# define PRINT_INFO(...)
+# define PRINT_WARN(...)
+# define PRINT_ERROR(...)
 #endif
 
 // -----------------------------------------------------------------------------
 
-// IF __cdecl THEN invert parameter list
+// NOTE: IF __cdecl THEN invert parameter list
 
-// OTHER
-// void __thiscall DVElementActorHuman::Translate (DVElementActorHuman * this, DVSequenceElement * param_1, DVcommand param_2)
-typedef void (__thiscall* tDVElementActorHumanTranslate) (PVOID, DWORD*, DWORD);
-// void __thiscall DVElementActorHuman::CheckIfViolationOfInternationalWar (DVElementActorHuman * this, DVElement * param_1, DVElement * param_2)
-typedef int (__stdcall* tDVElementActorHumanCheckIfViolationOfInternationalWar) (DWORD*, DWORD*);
-
-// CHARACTERS
-// DVDoc *__cdecl DVDoc::DVDoc(DVDoc *__hidden this)
-typedef DWORD* (__thiscall* tDVDoc) (PVOID);
-
+// -----------------------------------------------------------------------------
 // CONSOLE
-// _DWORD __cdecl DVConsole::DVConsole(DVConsole *this)
-typedef DWORD* (__thiscall* tDVConsole) (PVOID);
+// -----------------------------------------------------------------------------
+
+// _DWORD __cdecl DVConsole::DVConsole(DVConsole* this)
+typedef DWORD* (__thiscall* tDVConsole_Ctor)(PVOID);
+
 // _DWORD __cdecl DVConsole::ExecuteCommand(DVConsole* this)
-typedef DWORD (__thiscall* tDVConsoleExecuteCommand) (PVOID);
+typedef DWORD (__thiscall* tDVConsole_ExecuteCommand)(PVOID);
 
+// -----------------------------------------------------------------------------
 // DRAW MANAGER
-// _DWORD SBDrawManager::PrintConsole(SBDrawManager *__hidden this, char *, ...)
-typedef char (__cdecl* tSBDrawManagerPrintConsole) (PCHAR, PVOID);
-// _DWORD SBDrawManager::PrintConsole(SBDrawManager *__hidden this, unsigned int, char *, ...)
-typedef char(__cdecl* tSBDrawManagerPrintConsoleWithInt) (PCHAR, DWORD, PVOID);
+// -----------------------------------------------------------------------------
 
+// _DWORD SBDrawManager::PrintConsole(SBDrawManager* __hidden this, char*, ...)
+typedef char (__cdecl* tSBDrawManager_PrintConsole)(PCHAR, PVOID);
+
+// _DWORD SBDrawManager::PrintConsole(SBDrawManager* __hidden this, unsigned, char*, ...)
+typedef char(__cdecl* tSBDrawManager_PrintConsoleWithInt)(PCHAR, DWORD, PVOID);
+
+// -----------------------------------------------------------------------------
 // SCRIPTS
-// _DWORD __cdecl DVScript::DVScript(DVScript *this)
-typedef DWORD* (__thiscall* tDVScript) (PVOID);
+// -----------------------------------------------------------------------------
+
+// _DWORD __cdecl DVScript::DVScript(DVScript* this)
+typedef DWORD* (__thiscall* tDVScript_Ctor)(PVOID);
+
 // int DVScript::This()
-typedef int* (__stdcall* tDVScriptThis) ();
-// _DWORD __cdecl DVScript::GetActor(DVScript *this, int)
-typedef DWORD (__cdecl* tDVScriptGetActor) (int, PVOID);
-// _DWORD DVScript::GetCooper(DVScript *__hidden this)
-typedef DWORD* (__cdecl* tDVScriptGetCooper) (PVOID);
-// _DWORD __cdecl DVScript::Activate(DVScript *this, void *)
-typedef int (__cdecl* tDVScriptActivatePC) (DWORD*, PVOID);
-// _DWORD __cdecl DVScript::Deactivate(DVScript *this, void *)
-typedef int (__cdecl* tDVScriptDeactivatePC) (DWORD*, PVOID);
+typedef int* (__stdcall* tDVScript_This)();
 
-DWORD gameAddress = 0x0;
-tDVElementActorHumanTranslate DVElementActorHumanTranslate;
+// _DWORD __cdecl DVScript::GetActor(DVScript* this, int)
+typedef DWORD (__cdecl* tDVScript_GetActor)(int, PVOID);
 
-tDVDoc DVDoc;
+// _DWORD DVScript::GetCooper(DVScript* __hidden this)
+typedef DWORD* (__cdecl* tDVScript_GetCooper)(PVOID);
 
-tDVElementActorHumanCheckIfViolationOfInternationalWar DVElementActorHumanCheckIfViolationOfInternationalWar;
-tDVConsole DVConsole;
-tDVConsoleExecuteCommand DVConsoleExecuteCommand;
+// _DWORD __cdecl DVScript::Activate(DVScript* this, void*)
+typedef int (__cdecl* tDVScript_ActivatePC)(DWORD*, PVOID);
 
-tSBDrawManagerPrintConsole SBDrawManagerPrintConsole;
-tSBDrawManagerPrintConsoleWithInt SBDrawManagerPrintConsoleWithInt;
+// _DWORD __cdecl DVScript::Deactivate(DVScript* this, void*)
+typedef int (__cdecl* tDVScript_DeactivatePC)(DWORD*, PVOID);
 
-tDVScript DVScript;
-tDVScriptThis DVScriptThis;
-tDVScriptGetActor DVScriptGetActor;
-tDVScriptGetCooper DVScriptGetCooper;
-tDVScriptActivatePC DVScriptActivatePC;
-tDVScriptDeactivatePC DVScriptDeactivatePC;
+// -----------------------------------------------------------------------------
+// CHARACTERS
+// -----------------------------------------------------------------------------
 
-DWORD* thisDVScript = nullptr;
-DWORD* thisDVConsole = nullptr;
+// DVDoc* __cdecl DVDoc::DVDoc(DVDoc* __hidden this)
+typedef DWORD* (__thiscall* tDVDoc_Ctor)(PVOID);
 
-DWORD* __fastcall DVConsole_Hook(PVOID pThis)
+// -----------------------------------------------------------------------------
+// OTHER
+// -----------------------------------------------------------------------------
+
+// void __thiscall DVElementActorHuman::Translate (DVElementActorHuman* this, DVSequenceElement* param_1, DVcommand param_2)
+typedef void (__thiscall* tDVElementActorHuman_Translate)(PVOID, DWORD*, DWORD);
+
+// void __thiscall DVElementActorHuman::CheckIfViolationOfInternationalWar (DVElementActorHuman* this, DVElement* param_1, DVElement* param_2)
+typedef int (__stdcall* tDVElementActorHuman_CheckIfViolationOfInternationalWar)(DWORD*, DWORD*);
+
+// -----------------------------------------------------------------------------
+
+static tDVElementActorHuman_CheckIfViolationOfInternationalWar DVElementActorHuman_CheckIfViolationOfInternationalWar;
+static tDVElementActorHuman_Translate                          DVElementActorHuman_Translate;
+
+static tDVDoc_Ctor DVDoc_Ctor;
+
+static tDVConsole_Ctor           DVConsole_Ctor;
+static tDVConsole_ExecuteCommand DVConsole_ExecuteCommand;
+
+static tSBDrawManager_PrintConsole        SBDrawManager_PrintConsole;
+static tSBDrawManager_PrintConsoleWithInt SBDrawManager_PrintConsoleWithInt;
+
+static tDVScript_Ctor         DVScript_Ctor;
+static tDVScript_This         DVScript_This;
+static tDVScript_GetActor     DVScript_GetActor;
+static tDVScript_GetCooper    DVScript_GetCooper;
+static tDVScript_ActivatePC   DVScript_ActivatePC;
+static tDVScript_DeactivatePC DVScript_DeactivatePC;
+
+// -----------------------------------------------------------------------------
+
+static DWORD  gameAddress   = 0x0;
+static DWORD* thisDVScript  = nullptr;
+static DWORD* thisDVConsole = nullptr;
+
+// -----------------------------------------------------------------------------
+
+DWORD* __fastcall DVConsole_Ctor_Hook(PVOID pThis)
 {
     thisDVConsole = (DWORD*)pThis;
-    std::cout << "DVConsole is at: " << thisDVConsole << std::endl;
-    return DVConsole(pThis);
+    PRINT_DEBUG("thisDVConsole: %p", thisDVConsole);
+
+    return DVConsole_Ctor(pThis);
 }
 
-void _cdecl SBDrawManagerPrintConsole_Hook(PVOID pThis, char* text)
+DWORD* __fastcall DVScript_Ctor_Hook(PVOID pThis)
 {
-    if (&text)
-        std::cout << text << std::endl;
-}
-
-void _cdecl	SBDrawManagerPrintConsoleWithInt_Hook(PVOID pThis, DWORD* value, char* text)
-{
-    /*if (&text)
-        std::cout << text << std::endl;*/
-}
-
-DWORD* __fastcall DVScript_Hook(PVOID pThis)
-{
-    if (thisDVScript == nullptr) {
+    if (thisDVScript == nullptr)
+    {
         thisDVScript = (DWORD*)pThis;
-        std::cout << "DVScript is at: " << thisDVScript << std::endl;
+        PRINT_DEBUG("thisDVScript: %p", thisDVScript);
     }
-    return DVScript(pThis);
-}
 
-void __fastcall DVElementActorHumanTranslate_Hook(PVOID pThis, PVOID unused, DWORD* actor, DWORD a3)
-{
-    const int DEFAULT = 23;
-    const int KNOCKOUT = 45;
-    const int SHOT = 47;
-
-    DVElementActorHumanTranslate(pThis, actor, a3);
-}
-
-int __stdcall DVElementActorHumanCheckIfViolationOfInternationalWar_Hook(DWORD* a1, DWORD* a2) {
-
-    int x = DVElementActorHumanCheckIfViolationOfInternationalWar(a1, a2);
-    PVOID pDamageBase = 0;
-    __asm mov pDamageBase, edi
-    if (pDamageBase) {
-        short* Health = reinterpret_cast<short*>(pDamageBase) + 0x16 / 2;
-        //std::cout << *Health << std::endl;
-    }
-    //std::cout << "DVElementActorHumanCheckIfViolationOfInternationalWar: " << a1 << " - " << a2 << " = " << x << std::endl;
-    return x;
+    return DVScript_Ctor(pThis);
 }
 
 // -----------------------------------------------------------------------------
@@ -152,7 +143,7 @@ void stdinLoop()
         "* DESPERADOS+ CHEAT CONSOLE\n"
         "****************************************************************************************************\n"
         "MISC\n"
-        "    qqq                       Quit the game\n"
+        "    quit                      Quit the game\n"
         "CHEATS\n"
         "    clint                     Win mission\n"
         "    zeus                      Kill enemies using view cone cursor\n"
@@ -179,18 +170,19 @@ void stdinLoop()
         "****************************************************************************************************\n"
     );
 
+    DWORD       dwOldValue    = 0;
+    DWORD       dwTemp        = 0;
+    bool        minimiEnabled = false;
     std::string consoleInput;
-    DWORD dwOldValue, dwTemp;
-    bool minimiEnabled = false;
-
-    while (consoleInput != "qqq") {
-        //cin >> consoleInput;
-        //std::cout << "> ";
+    
+    while (consoleInput != "quit")
+    {
         getline(std::cin >> std::ws, consoleInput);
-        std::for_each(consoleInput.begin(), consoleInput.end(), [](char& c) {
-            c = ::tolower(c);
-        });
-
+        std::for_each(
+            consoleInput.begin(),
+            consoleInput.end(),
+            [](char& c) { c = static_cast<char>(::tolower(c)); }
+        );
         
         if (consoleInput == "toggle cooper") {
             if (thisDVConsole != nullptr) {
@@ -198,10 +190,10 @@ void stdinLoop()
                 if (*hero) {
                     BYTE* enabled = reinterpret_cast<BYTE*>(*hero) + 0xB5 / sizeof(BYTE);
                     if (*enabled) {
-                        std::cout << "Disabling control for Cooper." << std::endl;
+                        std::cout << "Disabling control for Cooper.\n";
                         *enabled = 0;
                     } else {
-                        std::cout << "Enabling control for Cooper." << std::endl;
+                        std::cout << "Enabling control for Cooper.\n";
                         *enabled = 1;
                     }
                 }
@@ -212,10 +204,10 @@ void stdinLoop()
                 if (*hero) {
                     BYTE* enabled = reinterpret_cast<BYTE*>(*hero) + 0xB5 / sizeof(BYTE);
                     if (*enabled) {
-                        std::cout << "Disabling control for Doc." << std::endl;
+                        std::cout << "Disabling control for Doc.\n";
                         *enabled = 0;
                     } else {
-                        std::cout << "Enabling control for Doc." << std::endl;
+                        std::cout << "Enabling control for Doc.\n";
                         *enabled = 1;
                     }
                 }
@@ -226,10 +218,10 @@ void stdinLoop()
                 if (*hero) {
                     BYTE* enabled = reinterpret_cast<BYTE*>(*hero) + 0xB5 / sizeof(BYTE);
                     if (*enabled) {
-                        std::cout << "Disabling control for Sanchez." << std::endl;
+                        std::cout << "Disabling control for Sanchez.\n";
                         *enabled = 0;
                     } else {
-                        std::cout << "Enabling control for Sanchez." << std::endl;
+                        std::cout << "Enabling control for Sanchez.\n";
                         *enabled = 1;
                     }
                 }
@@ -240,10 +232,10 @@ void stdinLoop()
                 if (*hero) {
                     BYTE* enabled = reinterpret_cast<BYTE*>(*hero) + 0xB5 / sizeof(BYTE);
                     if (*enabled) {
-                        std::cout << "Disabling control for Sam." << std::endl;
+                        std::cout << "Disabling control for Sam.\n";
                         *enabled = 0;
                     } else {
-                        std::cout << "Enabling control for Sam." << std::endl;
+                        std::cout << "Enabling control for Sam.\n";
                         *enabled = 1;
                     }
                 }
@@ -254,10 +246,10 @@ void stdinLoop()
                 if (*hero) {
                     BYTE* enabled = reinterpret_cast<BYTE*>(*hero) + 0xB5 / sizeof(BYTE);
                     if (*enabled) {
-                        std::cout << "Disabling control for Kate." << std::endl;
+                        std::cout << "Disabling control for Kate.\n";
                         *enabled = 0;
                     } else {
-                        std::cout << "Enabling control for Kate." << std::endl;
+                        std::cout << "Enabling control for Kate.\n";
                         *enabled = 1;
                     }
                 }
@@ -268,16 +260,16 @@ void stdinLoop()
                 if (*hero) {
                     BYTE* enabled = reinterpret_cast<BYTE*>(*hero) + 0xB5 / sizeof(BYTE);
                     if (*enabled) {
-                        std::cout << "Disabling control for Mia." << std::endl;
+                        std::cout << "Disabling control for Mia.\n";
                         *enabled = 0;
                     } else {
-                        std::cout << "Enabling control for Mia." << std::endl;
+                        std::cout << "Enabling control for Mia.\n";
                         *enabled = 1;
                     }
                 }
             }
         } else if (consoleInput == "partisan") {
-            std::cout << "Giving everybody a lot of ammo." << std::endl;
+            std::cout << "Giving everybody a lot of ammo.\n";
             if (thisDVConsole != nullptr) {
                 WORD* amount;
                 DWORD* cooper = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCCC / sizeof(DWORD);
@@ -315,18 +307,18 @@ void stdinLoop()
             PVOID subAddress = (PVOID)(gameAddress + 0x00095D09);
             VirtualProtect((LPVOID)subAddress, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &dwOldValue);
             if (!minimiEnabled) {
-                std::cout << "Gattling guns don't lose ammo." << std::endl;
+                std::cout << "Gatling guns have unlimited ammo.\n";
                 BYTE newCode[] = { 0x90, 0x90 };
                 memcpy(subAddress, newCode, sizeof(newCode));
             } else {
-                std::cout << "Gattling guns do lose ammo." << std::endl;
+                std::cout << "Gatling guns have limited ammo.\n";
                 BYTE newCode[] = { 0x2B, 0xD0 };
                 memcpy(subAddress, newCode, sizeof(newCode));
             }
             VirtualProtect((LPVOID)subAddress, sizeof(DWORD), dwOldValue, &dwTemp);
             minimiEnabled = !minimiEnabled;
         } else if (consoleInput == "give all") {
-            std::cout << "Giving a bunch of stuff to everybody." << std::endl;
+            std::cout << "Giving a bunch of stuff to everybody.\n";
             if (thisDVConsole != nullptr) {
                 WORD* amount;
                 DWORD* doc = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCD0 / sizeof(DWORD);
@@ -364,7 +356,7 @@ void stdinLoop()
                 }
             }
         } else if (consoleInput == "watch") {
-            std::cout << "Giving Cooper his watch." << std::endl;
+            std::cout << "Giving Cooper his watch.\n";
             if (thisDVConsole != nullptr) {
                 DWORD* cooper = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCCC / sizeof(DWORD);
                 if (*cooper) {
@@ -373,7 +365,7 @@ void stdinLoop()
                 }
             }
         } else if (consoleInput == "knife") {
-            std::cout << "Giving Cooper his knife." << std::endl;
+            std::cout << "Giving Cooper his knife.\n";
             if (thisDVConsole != nullptr) {
                 DWORD* cooper = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCCC / sizeof(DWORD);
                 if (*cooper) {
@@ -382,7 +374,7 @@ void stdinLoop()
                 }
             }
         } else if (consoleInput == "snake") {
-            std::cout << "Giving Sam a snake." << std::endl;
+            std::cout << "Giving Sam a snake.\n";
             if (thisDVConsole != nullptr) {
                 DWORD* sam = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCD8 / sizeof(DWORD);
                 if (*sam) {
@@ -391,7 +383,7 @@ void stdinLoop()
                 }
             }
         } else if (consoleInput == "tnt") {
-            std::cout << "Giving Sam some TNT." << std::endl;
+            std::cout << "Giving Sam some TNT.\n";
             if (thisDVConsole != nullptr) {
                 DWORD* sam = reinterpret_cast<DWORD*>(*thisDVConsole) + 0xCD8 / sizeof(DWORD);
                 if (*sam) {
@@ -399,46 +391,17 @@ void stdinLoop()
                     *amount = 1;
                 }
             }
-        }
-        
-        
-        /*if (consoleInput == "disable cooper") {
-            std::cout << "Disabling control for Cooper." << std::endl;
-            if (thisDVScript != nullptr) {
-                DWORD* cooper = DVScriptGetCooper(thisDVScript);
-                DVScriptDeactivatePC(cooper, thisDVScript);
-            }
-        } else if (consoleInput == "enable cooper") {
-            std::cout << "Enabling control for Cooper." << std::endl;
-            if (thisDVScript != nullptr) {
-                DWORD* cooper = DVScriptGetCooper(thisDVScript);
-                DVScriptActivatePC(cooper, thisDVScript);
-            }
-        } else if (consoleInput == "spawn_doc") {
-            std::cout << "Spawning Doc." << std::endl;
-            if (thisDVConsole != nullptr) {
-               PVOID doc = malloc(0x2C8u);
-               PVOID docChar = DVDoc(doc); // TODO: Get this from DVEngine
-
-            }
-        } else if (consoleInput == "ammo") {
-            std::cout << "Giving Doc ammo." << std::endl;
-            if (thisDVConsole != nullptr) {
-                DWORD* doc = reinterpret_cast<DWORD*>(*thisDVConsole) + 3280 / sizeof(DWORD);
-                WORD* docSniperAmmo = reinterpret_cast<WORD*>(*doc) + 704 / sizeof(WORD);
-                *docSniperAmmo = 5;
-            }
-        }*/ else {
+        } else {
             if (thisDVConsole != nullptr) {
                 DWORD* input = reinterpret_cast<DWORD*>(thisDVConsole) + 0x4 / sizeof(DWORD);
                 memcpy(input, consoleInput.c_str(), sizeof(consoleInput));
-                //std::cout << "Entering cheat: " << (char*)input << std::endl;
-                DVConsoleExecuteCommand(thisDVConsole);
+                PRINT_DEBUG("Calling DVConsole::ExecuteCommand with '%s'", (char*)input);
+                PRINT_DEBUG("Return value: %i", (int)DVConsole_ExecuteCommand(thisDVConsole));
             }
         }
     }
 
-    exit(0);
+    exit(EXIT_SUCCESS);
 }
 
 // -----------------------------------------------------------------------------
@@ -448,7 +411,7 @@ static std::thread stdinLoopThread;
 
 void initStdinLoop()
 {
-    DEBUG("Entering stdin loop");
+    PRINT_DEBUG("Entering stdin loop");
     stdinLoopThread = std::thread(stdinLoop);
 }
 
@@ -472,56 +435,56 @@ static void initFunctionAddresses(DWORD baseAddr)
 
     // -----
     
-    DVElementActorHumanTranslate =
-        (tDVElementActorHumanTranslate)
+    DVElementActorHuman_Translate =
+        (tDVElementActorHuman_Translate)
         (baseAddr + 0x0009CC60);
     
-    DVElementActorHumanCheckIfViolationOfInternationalWar =
-        (tDVElementActorHumanCheckIfViolationOfInternationalWar)
+    DVElementActorHuman_CheckIfViolationOfInternationalWar =
+        (tDVElementActorHuman_CheckIfViolationOfInternationalWar)
         (baseAddr + 0x00093930);
 
-    DVDoc =
-        (tDVDoc)
+    DVDoc_Ctor =
+        (tDVDoc_Ctor)
         (baseAddr + 0x0007D1B0);
 
-    DVConsole =
-        (tDVConsole)
+    DVConsole_Ctor =
+        (tDVConsole_Ctor)
         (baseAddr + 0x00075DC0);
 
-    DVConsoleExecuteCommand =
-        (tDVConsoleExecuteCommand)
+    DVConsole_ExecuteCommand =
+        (tDVConsole_ExecuteCommand)
         (baseAddr + 0x00075DE0);
 
-    SBDrawManagerPrintConsole =
-        (tSBDrawManagerPrintConsole)
+    SBDrawManager_PrintConsole =
+        (tSBDrawManager_PrintConsole)
         (baseAddr + 0x0007A940);
     
-    SBDrawManagerPrintConsoleWithInt =
-        (tSBDrawManagerPrintConsoleWithInt)
+    SBDrawManager_PrintConsoleWithInt =
+        (tSBDrawManager_PrintConsoleWithInt)
         (baseAddr + 0x0010C9A6);
 
-    DVScript =
-        (tDVScript)
+    DVScript_Ctor =
+        (tDVScript_Ctor)
         (baseAddr + 0x0015B410);
     
-    DVScriptThis =
-        (tDVScriptThis)
+    DVScript_This =
+        (tDVScript_This)
         (baseAddr + 0x0015DAE0);
     
-    DVScriptGetActor =
-        (tDVScriptGetActor)
+    DVScript_GetActor =
+        (tDVScript_GetActor)
         (baseAddr + 0x0015CFF0);
 
-    DVScriptGetCooper =
-        (tDVScriptGetCooper)
+    DVScript_GetCooper =
+        (tDVScript_GetCooper)
         (baseAddr + 0x0015D4A0);
 
-    DVScriptActivatePC =
-        (tDVScriptActivatePC)
+    DVScript_ActivatePC =
+        (tDVScript_ActivatePC)
         (baseAddr + 0x0015B580);
 
-    DVScriptDeactivatePC =
-        (tDVScriptDeactivatePC)
+    DVScript_DeactivatePC =
+        (tDVScript_DeactivatePC)
         (baseAddr + 0x0015C620);
 }
 
@@ -534,54 +497,56 @@ static void initHooks()
 
     if (DetourTransactionBegin() != 0)
     {
-        ERROR("DetourTransactionBegin(): %i", (int)GetLastError());
+        PRINT_ERROR("DetourTransactionBegin(): error code: %i", (int)GetLastError());
         return;
     }
 
     if (DetourUpdateThread(GetCurrentThread()) != 0)
     {
-        ERROR("DetourUpdateThread(): %i", (int)GetLastError());
+        PRINT_ERROR("DetourUpdateThread(): error code: %i", (int)GetLastError());
         return;
     }
 
-    if (DetourAttach(&(PVOID&)DVConsole, DVConsole_Hook) != 0
-        || DetourAttach(&(PVOID&)DVScript, DVScript_Hook) != 0)
+    if (DetourAttach(&(PVOID&)DVConsole_Ctor, DVConsole_Ctor_Hook) != 0
+        || DetourAttach(&(PVOID&)DVScript_Ctor, DVScript_Ctor_Hook) != 0)
     {
-        ERROR("DetourAttach(): %i", (int)GetLastError());
+        PRINT_ERROR("DetourAttach(): error code: %i", (int)GetLastError());
         return;
     }
 
     if (DetourTransactionCommit() != 0)
     {
-        ERROR("DetourTransactionCommit(): %i", (int)GetLastError());
+        PRINT_ERROR("DetourTransactionCommit(): error code: %i", (int)GetLastError());
         return;
     }
 }
 
 // -----------------------------------------------------------------------------
 
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID /*lpvReserved*/)
+BOOL APIENTRY DllMain(HMODULE /*hModule*/, DWORD fdwReason, LPVOID /*lpvReserved*/)
 {
     switch (fdwReason)
     {
     case DLL_PROCESS_ATTACH:
-        DEBUG("DLL_PROCESS_ATTACH");
+        PRINT_DEBUG("DLL_PROCESS_ATTACH");
         initConsole();
         initFunctionAddresses((DWORD)GetModuleHandleA(NULL));
         initStdinLoop();
         break;
 
     case DLL_THREAD_ATTACH:
-        DEBUG("DLL_THREAD_ATTACH");
+        PRINT_DEBUG("DLL_THREAD_ATTACH");
         initHooks();
         break;
 
     case DLL_THREAD_DETACH:
-        DEBUG("DLL_THREAD_DETACH");
+        PRINT_DEBUG("DLL_THREAD_DETACH");
+        // TODO: Handle.
         break;
 
     case DLL_PROCESS_DETACH:
-        DEBUG("DLL_PROCESS_DETACH");
+        PRINT_DEBUG("DLL_PROCESS_DETACH");
+        // TODO: Handle.
         break;
     }
 
